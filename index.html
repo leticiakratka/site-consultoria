@@ -4,6 +4,14 @@
   <!-- Google Tag Manager -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=true;j.src="https://api.leticiakratka.com.br/chlmzfcpcchg.js?"+i;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','3t5wf=DgxeJCQuSzReLyAgKjAxXBFVUU1BRQIUWgQGFxkADxsMGgIXGwJIGQgFTQEC');</script>
   <!-- End Google Tag Manager -->
+  <!-- GA4 direto: so para o evento de conversao do formulario (nao envia pageview, evita duplicar) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-DH6GQF647Z"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-DH6GQF647Z', { send_page_view: false });
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Consultoria Financeira – Letícia Kratka | Organização e Segurança Financeira</title>
@@ -1671,6 +1679,16 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.clas
 
     if (enviado) {
       const temAgenda = ['7k-12k','12k-18k','18k-50k','acima-50k'].includes(renda);
+
+      // Conversao: marca no GA4 que um lead preencheu o formulario
+      if (typeof gtag === 'function') {
+        gtag('event', 'lead_consultoria', {
+          renda: payload.renda,
+          agendou: temAgenda,
+          send_to: 'G-DH6GQF647Z'
+        });
+      }
+
       root.querySelector('#lck-redirectMsg').textContent = temAgenda
         ? 'Redirecionando para escolher seu horário...'
         : 'Redirecionando você agora...';
