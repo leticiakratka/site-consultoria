@@ -2,16 +2,13 @@
 <html lang="pt-BR">
 <head>
   <!-- Google Tag Manager -->
-  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=true;j.src="https://api.leticiakratka.com.br/chlmzfcpcchg.js?"+i;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','3t5wf=DgxeJCQuSzReLyAgKjAxXBFVUU1BRQIUWgQGFxkADxsMGgIXGwJIGQgFTQEC');</script>
+  <!-- Carregando pelo dominio padrao do Google. O loader first-party
+       (api.leticiakratka.com.br) esta fora do ar: certificado invalido + 404.
+       Quando o servidor server-side voltar, e so trocar o j.src de volta para
+       "https://api.leticiakratka.com.br/chlmzfcpcchg.js?" e devolver o
+       parametro ofuscado no lugar do id no ultimo argumento. -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src="https://www.googletagmanager.com/gtm.js?id="+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-N9GCCZSW');</script>
   <!-- End Google Tag Manager -->
-  <!-- GA4 direto: so para o evento de conversao do formulario (nao envia pageview, evita duplicar) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-DH6GQF647Z"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){ dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-DH6GQF647Z', { send_page_view: false });
-  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Consultoria Financeira – Letícia Kratka | Organização e Segurança Financeira</title>
@@ -43,7 +40,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://leticiakratka.com.br">
-  <link rel="preconnect" href="https://api.leticiakratka.com.br">
+  <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="dns-prefetch" href="https://leticiakratka.com.br">
 
   <!-- Preload hero LCP image (desktop) -->
@@ -884,7 +881,7 @@
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://api.leticiakratka.com.br/ns.html?id=GTM-N9GCCZSW" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N9GCCZSW" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 
 
@@ -1680,14 +1677,16 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.clas
     if (enviado) {
       const temAgenda = ['7k-12k','12k-18k','18k-50k','acima-50k'].includes(renda);
 
-      // Conversao: marca no GA4 que um lead preencheu o formulario
-      if (typeof gtag === 'function') {
-        gtag('event', 'lead_consultoria', {
-          renda: payload.renda,
-          agendou: temAgenda,
-          send_to: 'G-DH6GQF647Z'
-        });
-      }
+      // Conversao: avisa o dataLayer que um lead preencheu o formulario.
+      // Quem escuta e o GTM (GTM-N9GCCZSW). Criar la um acionador de
+      // Evento personalizado com nome exato "lead_consultoria" e pendurar
+      // nele a tag de conversao do GA4 e do Google Ads.
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'lead_consultoria',
+        renda: payload.renda,
+        agendou: temAgenda
+      });
 
       root.querySelector('#lck-redirectMsg').textContent = temAgenda
         ? 'Redirecionando para escolher seu horário...'
