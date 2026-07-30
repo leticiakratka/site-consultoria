@@ -1626,6 +1626,39 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.clas
     });
   }
 
+  /* ---------------------------------------------------------------
+     Dados do lead para a correspondencia avancada do Meta.
+     O proprio pixel faz o hash SHA-256 no navegador antes de enviar,
+     entao aqui a gente so normaliza, que e o que eleva a taxa de
+     correspondencia. Nada sai daqui em texto puro para a Meta.
+  --------------------------------------------------------------- */
+  function normTexto(v) {
+    return (v || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  }
+
+  function normTelefone(v) {
+    const bruto = (v || '').trim();
+    const d = bruto.replace(/\D/g, '');
+    if (!d) return '';
+    if (bruto.startsWith('+')) return d;              // ja veio com codigo do pais
+    if (d.length === 10 || d.length === 11) return '55' + d;  // DDD + numero
+    return d;
+  }
+
+  /* ID proprio e persistente, util depois para deduplicar com a CAPI */
+  function externalId() {
+    try {
+      let id = localStorage.getItem('lck_eid');
+      if (!id) {
+        id = 'lck-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+        localStorage.setItem('lck_eid', id);
+      }
+      return id;
+    } catch (e) {
+      return '';
+    }
+  }
+
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
     erroEnvio.style.display = 'none';
@@ -1680,12 +1713,28 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.clas
       // Conversao: avisa o dataLayer que um lead preencheu o formulario.
       // Quem escuta e o GTM (GTM-N9GCCZSW). Criar la um acionador de
       // Evento personalizado com nome exato "lead_consultoria" e pendurar
-      // nele a tag de conversao do GA4 e do Google Ads.
+      // nele a tag de conversao do GA4, do Google Ads e o evento Lead
+      // do pixel da Meta.
+      //
+      // O bloco user_data alimenta a correspondencia avancada do Meta.
+      // Cidade, estado e genero ficam de fora porque o formulario nao
+      // pergunta isso. Se um dia passar a perguntar, e so acrescentar
+      // aqui e mapear a variavel no GTM.
+      const nomePartes = normTexto(payload.nome).split(' ').filter(Boolean);
+
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
         event: 'lead_consultoria',
         renda: payload.renda,
-        agendou: temAgenda
+        agendou: temAgenda,
+        user_data: {
+          email:       normTexto(payload.email),
+          phone:       normTelefone(payload.telefone),
+          first_name:  nomePartes[0] || '',
+          last_name:   nomePartes.slice(1).join(' '),
+          country:     'br',
+          external_id: externalId()
+        }
       });
 
       root.querySelector('#lck-redirectMsg').textContent = temAgenda
