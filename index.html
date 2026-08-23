@@ -1758,5 +1758,22 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.clas
 })();
 </script>
 
+<script>
+  // rola ate a secao sem mudar a URL/historico do navegador. Um <a href="#formulario">
+  // normal muda location.hash, o que dispara gtm.historyChange - e isso reativa o
+  // rastreamento de "mudanca de pagina" de pixels com push-state habilitado (Facebook
+  // Pixel do GTM), fazendo o clique no botao contar como PageView e poluir a metrica.
+  // Rolando via JS em vez de deixar o navegador navegar pra #, a URL nunca muda e esse
+  // gatilho nunca dispara. Mesmo ajuste feito nas paginas do Caixa Livre (cxlv2/v4/v5).
+  document.querySelectorAll('a[href^="#"]').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      var alvo = document.getElementById(this.getAttribute('href').slice(1));
+      if (!alvo) return;
+      e.preventDefault();
+      alvo.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+</script>
+
 </body>
 </html>
