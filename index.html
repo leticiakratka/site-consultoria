@@ -10,24 +10,6 @@
   })(window,document,'script','dataLayer','GTM-TZ7859WF');</script>
   <!-- End Google Tag Manager -->
 
-  <!-- Meta Pixel -->
-  <script>
-  !function(f,b,e,v,n,t,s)
-  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-  n.queue=[];t=b.createElement(e);t.async=!0;
-  t.src=v;s=b.getElementsByTagName(e)[0];
-  s.parentNode.insertBefore(t,s)}(window, document,'script',
-  'https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', '2303946203194082');
-  fbq('track', 'PageView');
-  </script>
-  <noscript><img height="1" width="1" style="display:none"
-    src="https://www.facebook.com/tr?id=2303946203194082&ev=PageView&noscript=1"
-  /></noscript>
-  <!-- End Meta Pixel -->
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Consultoria Financeira – Letícia Kratka | Organização e Segurança Financeira</title>
   <meta name="description" content="Consultoria financeira personalizada para quem ganha mais de R$10 mil e quer organizar a vida financeira com qualidade de vida. Agende sua reunião.">
@@ -2038,19 +2020,18 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.clas
       // aqui e mapear a variavel no GTM.
       const nomePartes = normTexto(payload.nome).split(' ').filter(Boolean);
 
-      // event_id compartilhado entre o Pixel (navegador) e o Worker (servidor),
-      // pra Meta deduplicar os dois canais como 1 evento so em vez de contar 2x.
-      // Mesmo principio usado no funil do Caixa Livre (la e a variavel do GTM
-      // "Unique Event ID - Stape"; aqui, como nao passa pelo GTM, gera direto).
+      // event_id compartilhado entre a tag de Lead do GTM (navegador) e o
+      // Worker (servidor), pra Meta deduplicar os dois canais como 1 evento
+      // so em vez de contar 2x. Gerado aqui e mandado pros dois lados: vai
+      // dentro do dataLayer.push (pra tag de Lead do GTM usar como Event ID -
+      // precisa de uma Variavel de Camada de Dados lendo "event_id" e o campo
+      // Event ID da tag configurado com ela) e no fetch pro Worker logo abaixo.
       const leadEventId = crypto.randomUUID();
-
-      if (typeof fbq === 'function') {
-        fbq('track', 'Lead', {}, { eventID: leadEventId });
-      }
 
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
         event: 'lead_consultoria',
+        event_id: leadEventId,
         renda: payload.renda,
         agendou: temAgenda,
         user_data: {
@@ -2063,13 +2044,14 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.clas
         }
       });
 
-      // Envia o mesmo Lead (mesmo leadEventId do fbq acima, pra deduplicar com
-      // o Pixel) direto pro Worker de tracking (lck-tracking-meta-capi), que
-      // monta o evento (com hash server-side) e manda pra Meta Conversions API.
-      // Mesmo endpoint /funil ja usado no funil do Caixa Livre, mesmo formato de
-      // payload (ver worker/src/funil.js). Nao depende de nenhuma tag configurada
-      // dentro do GTM - roda direto daqui. Falha silenciosa, nao pode travar o
-      // redirecionamento do lead se o Worker estiver fora do ar.
+      // Envia o mesmo Lead (mesmo leadEventId do dataLayer.push acima, pra
+      // deduplicar com a tag de Lead do GTM) direto pro Worker de tracking
+      // (lck-tracking-meta-capi), que monta o evento (com hash server-side) e
+      // manda pra Meta Conversions API. Mesmo endpoint /funil ja usado no
+      // funil do Caixa Livre, mesmo formato de payload (ver worker/src/funil.js).
+      // Nao depende de nenhuma tag configurada dentro do GTM - roda direto
+      // daqui. Falha silenciosa, nao pode travar o redirecionamento do lead
+      // se o Worker estiver fora do ar.
       fetch('https://lck-tracking-meta-capi.leticiakratka1.workers.dev/funil', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
