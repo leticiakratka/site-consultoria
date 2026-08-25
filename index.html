@@ -2064,7 +2064,9 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.clas
           first_name: nomePartes[0] || '',
           last_name:  nomePartes.slice(1).join(' '),
           fbp:        getCookie('_fbp'),
-          fbc:        getCookie('_fbc')
+          fbc:        getCookie('_fbc'),
+          renda:      payload.renda,
+          ...getUTMs()
         })
       }).catch(function () {});
 
