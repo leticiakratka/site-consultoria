@@ -629,33 +629,41 @@
     ===================================================== */
     .bio {
       background-color: var(--beige);
-      min-height: 650px;
-      padding: 60px 10px;
     }
 
+    /* Grid de 3 faixas em vez de flex dentro do .wrap de largura máxima: a 1ª
+       faixa (a foto) não tem limite - ela vaza até a borda esquerda de verdade
+       da tela, ficando grande como no design original. A 2ª faixa (o texto) tem
+       um teto de largura fixo, e a 3ª é só uma folga do lado direito em telas
+       largas. Como a foto e o texto vivem cada um na sua própria faixa do grid,
+       nunca se cruzam, em nenhum zoom ou largura de tela - diferente de antes,
+       quando a foto era background da seção inteira (vazando) e o texto ficava
+       preso a um .wrap de largura máxima: os dois escalavam de um jeito
+       diferente conforme o zoom mudava, e às vezes a foto avançava sobre o
+       texto. */
     .bio .wrap {
-      display: flex;
-      gap: 30px;
-      min-height: 650px;
-      align-items: flex-start;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) min(570px, calc(50% - 15px)) minmax(20px, 48px);
+      column-gap: 30px;
+      align-items: center;
+      padding-block: 60px;
+      max-width: none;
+      padding-inline: 0;
     }
 
-    /* A foto fica no fundo desta coluna (não da seção inteira) - assim ela sempre
-       acompanha exatamente a largura/posição da coluna, sem depender do zoom ou da
-       largura da tela pra alinhar com o texto ao lado. Antes a foto era background
-       da seção de ponta a ponta, enquanto o texto ficava preso à faixa central
-       (max-width), e os dois se moviam de forma diferente conforme o zoom mudava -
-       às vezes a foto avançava sobre o texto. */
+    /* Altura própria, independente da altura do texto ao lado - senão em textos
+       longos o grid esticava essa coluna bem mais alto que a largura dela,
+       forçando o cover a dar um zoom errado na foto pra cobrir a altura toda. */
     .bio-left {
-      width: 48%;
-      min-height: 650px;
+      align-self: center;
+      height: 650px;
       background-color: var(--beige);
       background-image: url('img/2025-04/leticia-4.webp');
       background-size: cover;
       background-position: center left;
       background-repeat: no-repeat;
     }
-    .bio-right { width: 50%; padding-top: 80px; }
+    .bio-right { padding-block: 80px; }
 
     .bio-photo-mobile { display: none; } /* visível só no mobile via media query */
 
@@ -1033,10 +1041,15 @@
          Desktop: foto via background-image na coluna esquerda, texto à direita.
          Mobile: background removido; bio-photo-mobile exibe a foto real em cima do texto. */
       .bio {
-        min-height: auto;
         padding: 0 0 40px;
       }
-      .bio .wrap { flex-direction: column; min-height: auto; gap: 0; }
+      .bio .wrap {
+        display: block;
+        max-width: var(--max-width);
+        padding: 0 20px;
+        margin-inline: auto;
+        min-height: auto;
+      }
       .bio-left  {
         display: block;
         width: 100%;
@@ -1050,7 +1063,7 @@
         object-fit: cover;
         object-position: center top;
       }
-      .bio-right    { width: 100%; padding-top: 16px; }
+      .bio-right    { width: 100%; padding-top: 16px; padding-bottom: 0; }
       .bio-right h3 { font-size: 20px; line-height: 28px; }
       .bio-right p  { font-size: 16px; }
 
