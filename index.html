@@ -645,18 +645,19 @@
       display: grid;
       grid-template-columns: minmax(0, 1fr) min(570px, calc(50% - 15px)) minmax(20px, 48px);
       column-gap: 30px;
-      align-items: center;
-      padding-block: 60px;
       max-width: none;
-      padding-inline: 0;
+      padding: 0;
     }
 
-    /* Altura própria, independente da altura do texto ao lado - senão em textos
-       longos o grid esticava essa coluna bem mais alto que a largura dela,
-       forçando o cover a dar um zoom errado na foto pra cobrir a altura toda. */
+    /* Sem padding-block nem altura própria: a foto estica (align-items:stretch,
+       o padrão do grid) até a altura da linha inteira, que quem define é o
+       texto ao lado - assim ela ocupa a seção de ponta a ponta (sem folga em
+       cima/embaixo), e como agora a coluna é bem mais larga (sem limite de
+       largura), a proporção larg./alt. fica parecida com um retrato normal em
+       vez de ficar fina e alta - por isso o cover não precisa dar um zoom
+       exagerado pra cobrir a caixa. min-height é só um piso pra texto curto. */
     .bio-left {
-      align-self: center;
-      height: 650px;
+      min-height: 650px;
       background-color: var(--beige);
       background-image: url('img/2025-04/leticia-4.webp');
       background-size: cover;
