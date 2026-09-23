@@ -1500,7 +1500,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <h2 class="reveal">Se você está pronto para transformar sua vida financeira, clique no botão abaixo e preencha o formulário com atenção.</h2>
 
-    <p class="reveal">Após o envio você será redirecionado para agendar sua reunião, e entender melhor seu cenário para <b>apresentar nossa proposta</b>.</p>
+    <p class="reveal">Após o envio você vai falar direto com a nossa equipe no WhatsApp para agendar sua reunião, e entender melhor seu cenário para <b>apresentar nossa proposta</b>.</p>
 
     <button class="btn btn-gold reveal" id="open-popup">
       <svg viewBox="0 0 448 512"><path fill="currentColor" d="M313.941 216H12c-6.627 0-12 5.373-12 12v56c0 6.627 5.373 12 12 12h301.941v46.059c0 21.382 25.851 32.09 40.971 16.971l86.059-86.059c9.373-9.373 9.373-24.569 0-33.941l-86.059-86.059c-15.119-15.119-40.971-4.411-40.971 16.971V216z"/></svg>
@@ -1858,7 +1858,8 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.clas
   const URL_AGENDAMENTO_VANESSA = 'https://calendar.app.google/gRKzU7t9hUxswPwb8';
   const URL_AGENDAMENTO_LETICIA = 'https://calendar.app.google/HdEe5HMMkn7B3JDZ7';
   const WHATSAPP_JEANE          = '5561999245689';
-  const MSG_WHATSAPP            = 'Oi! Preenchi o formulário da consultoria e quero saber mais';
+  const MSG_WHATSAPP            = 'Oi! Preenchi o formulário da consultoria e quero saber mais.';
+  const MSG_WHATSAPP_QUALIFICADO = 'Oi! Acabei de preencher o formulário de interesse na consultoria e quero agendar meu diagnóstico com um planejador financeiro!';
   /* ==================================================== */
 
   // Persiste UTMs no sessionStorage ao carregar a página.
@@ -1885,11 +1886,13 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.clas
     };
   }
 
+  // Todos os leads vão pro WhatsApp da Jeane (SDR). A renda só muda a mensagem:
+  // 7k+ chega pedindo pra agendar o diagnóstico. As URLs de agenda acima ficam
+  // guardadas caso o redirecionamento direto pro closer volte a ser usado.
   function getRedirectUrl(renda) {
-    if (renda === 'acima-50k') return URL_AGENDAMENTO_VANESSA;
-    if (renda === '12k-18k' || renda === '18k-50k') return URL_AGENDAMENTO_VANESSA;
-    if (renda === '7k-12k') return URL_AGENDAMENTO_PAULO;
-    return 'https://wa.me/' + WHATSAPP_JEANE + '?text=' + encodeURIComponent(MSG_WHATSAPP);
+    const qualificado = ['7k-12k','12k-18k','18k-50k','acima-50k'].includes(renda);
+    const msg = qualificado ? MSG_WHATSAPP_QUALIFICADO : MSG_WHATSAPP;
+    return 'https://wa.me/' + WHATSAPP_JEANE + '?text=' + encodeURIComponent(msg);
   }
 
   const root       = document.querySelector('.lck-embed');
@@ -2102,7 +2105,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.clas
       }).catch(function () {});
 
       root.querySelector('#lck-redirectMsg').textContent = temAgenda
-        ? 'Redirecionando para escolher seu horário...'
+        ? 'Te levando pro WhatsApp da nossa equipe pra agendar seu diagnóstico...'
         : 'Redirecionando você agora...';
       successMsg.style.display = 'block';
 
