@@ -1864,7 +1864,12 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.clas
   /* ====================================================
      CONFIGURAÇÃO — edite apenas esta seção
   ==================================================== */
-  const APPS_SCRIPT_URL     = 'https://script.google.com/macros/s/AKfycby0tNcLGdZGKjbRj8lYAHQ365pD-gEEPbjLtpPSXcLG0V0gK2axVWC5dSz7RMu0d4cfxg/exec';
+  // O formulário manda direto pro n8n (fluxo "Formulários → Lead", webhook
+  // "Webhook Forms HTML"), que grava na planilha "Novas respostas" e leva o
+  // lead pro CRM. Até 21/10/2026 passava por um Apps Script no meio, que só
+  // repassava pro n8n e ficou rodando uma versão antiga sem o objetivo de 12
+  // meses nem o rastreio do Meta.
+  const WEBHOOK_URL         = 'https://n8nwebhook.leticiakratka.shop/webhook/forms-html';
   const URL_AGENDAMENTO_PAULO   = 'https://calendar.app.google/rBLtrzhsg6pTGgw57';
   const URL_AGENDAMENTO_VANESSA = 'https://calendar.app.google/gRKzU7t9hUxswPwb8';
   const URL_AGENDAMENTO_LETICIA = 'https://calendar.app.google/HdEe5HMMkn7B3JDZ7';
@@ -1946,21 +1951,18 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.clas
     }
   });
 
+  // O n8n responde 200 assim que recebe e roda o fluxo depois; qualquer
+  // resposta OK conta como enviado.
   function enviarDados(payload) {
     return new Promise(resolve => {
       const timeout = setTimeout(() => resolve(false), 10000);
-      const url = APPS_SCRIPT_URL + '?' + new URLSearchParams(payload).toString();
-      fetch(url, { method: 'GET' })
-        .then(r => r.json())
-        .then(d => { clearTimeout(timeout); resolve(d.status === 'ok'); })
-        .catch(() => {
-          clearTimeout(timeout);
-          const s = document.createElement('script');
-          const fb = setTimeout(() => { try { document.head.removeChild(s); } catch(e){} resolve(true); }, 5000);
-          s.onerror = () => { clearTimeout(fb); resolve(false); };
-          s.src = url;
-          document.head.appendChild(s);
-        });
+      fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+        .then(r => { clearTimeout(timeout); resolve(r.ok); })
+        .catch(() => { clearTimeout(timeout); resolve(false); });
     });
   }
 
